@@ -1,19 +1,34 @@
 from fastapi import FastAPI, HTTPException
 from google.cloud import bigquery
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from contextlib import asynccontextmanager
+import logging
 import os
-
-# os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="project-6c63eb79-eb66-49ad-b4d.example.accidentes"
-# We don't need to specify paths or keys; the google-cloud-bigquery library is smart enough to find the ADC file you just created.
-# > gcloud init
-# > gcloud auth application-default login
 
 client = bigquery.Client()
 
-# Create the FastAPI instance
-app = FastAPI()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def my_cron_logic():
+    logger.info("Cronjob executed: Logic from BigQuery or elsewhere running now...")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    scheduler = AsyncIOScheduler()
+
+    scheduler.add_job(my_cron_logic, "interval", seconds=2)
+    scheduler.start()
+    logger.info("🚀 Scheduler started...")
+    
+    yield
+    
+    scheduler.shutdown()
+    logger.info("🛑 Scheduler shut down.")
+
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/read-accidentes")
-# def select_accidentes_query(fecha: Optional[str] = None):
 def select_accidentes_query():
     query = f"""
         SELECT sexo
@@ -48,9 +63,15 @@ def insert_accidentes_query():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"BigQuery Error: {str(e)}")
 
-
-
-# Define your GET endpoint
 @app.get("/")
 def read_root():
     return {"message": "Hello, World!"}
+
+
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="project-6c63eb79-eb66-49ad-b4d.example.accidentes"
+# We don't need to specify paths or keys; the google-cloud-bigquery library is smart enough to find the ADC file you just created.
+# > gcloud init
+# > gcloud auth application-default login# os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="project-6c63eb79-eb66-49ad-b4d.example.accidentes"
+# We don't need to specify paths or keys; the google-cloud-bigquery library is smart enough to find the ADC file you just created.
+# > gcloud init
+# > gcloud auth application-default login
