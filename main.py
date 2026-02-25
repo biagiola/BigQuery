@@ -1,7 +1,5 @@
 import logging
 from fastapi import FastAPI
-from contextlib import asynccontextmanager
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from config import settings
 
 import database
@@ -10,23 +8,16 @@ import tasks
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    scheduler = AsyncIOScheduler()
+app = FastAPI()
 
-    scheduler.add_job(
-        tasks.my_cron_logic,
-        "interval",
-        seconds=settings.CRON_INTERVAL_SECONDS
-    )
+@app.get("/update-database")
+def update_database():
+    # make the request to the external API and update the database
+    tasks.request_new_data()
+    tasks.insert_new_data()
+    logger.info("Database updated successfully")
 
-    scheduler.start()
-    logger.info("Scheduler started...")
-    yield
-    scheduler.shutdown()
-    logger.info("Scheduler shut down.")
-
-app = FastAPI(lifespan=lifespan)
+    return {"status": "success", "message": "Database updated successfully"}
 
 @app.get("/read-accidentes")
 def read_accidentes():

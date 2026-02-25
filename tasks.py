@@ -2,6 +2,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def my_cron_logic():
+def request_new_data():
     # Make external API calls to update database
-    logger.info("Cronjob executed: Logic from BigQuery...")
+    logger.info("Cronjob executed: Requesting new data...")
+
+def insert_new_data():
+    # Insert new data into the database
+    logger.info("Cronjob executed: Inserting new data...")
