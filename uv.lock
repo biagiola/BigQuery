@@ -344,6 +344,7 @@ dependencies = [
     { name = "apscheduler" },
     { name = "fastapi", extra = ["standard"] },
     { name = "google-cloud-bigquery" },
+    { name = "python-dotenv" },
 ]
 
 [package.metadata]
@@ -351,6 +352,7 @@ requires-dist = [
     { name = "apscheduler", specifier = ">=3.11.2" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.133.0" },
     { name = "google-cloud-bigquery", specifier = ">=3.40.1" },
+    { name = "python-dotenv", specifier = ">=1.2.1" },
 ]
 
 [[package]]

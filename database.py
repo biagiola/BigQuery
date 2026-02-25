@@ -1,10 +1,14 @@
+import os
 from google.cloud import bigquery
+from dotenv import load_dotenv
 from fastapi import HTTPException
+from config import settings
 
-client = bigquery.Client()
+# client = bigquery.Client()
+client = bigquery.Client(project=settings.PROJECT_ID)
 
 def get_accidentes():
-    query = "SELECT sexo FROM `project-6c63eb79-eb66-49ad-b4d.example.accidentes`"
+    query = f"SELECT sexo FROM `{settings.TABLE_FULL_PATH}`"
     try:
         query_job = client.query(query)
         return [dict(row) for row in query_job.result()]
@@ -13,7 +17,7 @@ def get_accidentes():
 
 def insert_test_accidentes():
     query = """
-        INSERT INTO `project-6c63eb79-eb66-49ad-b4d.example.accidentes` 
+        INSERT INTO `{settings.TABLE_FULL_PATH}` 
         (ID, Fecha, Hora, Ubicacion, Edad, Sexo, Fallecido, alcohol_positivo, tipo_vehiculo, departamento, ciudad)
         VALUES
         (1, '2026-01-01', '11:11:00', NULL, 32, 'F', 0, 1, 'Motocicleta', 'Central', 'Asuncion'),

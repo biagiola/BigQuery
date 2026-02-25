@@ -2,6 +2,7 @@ import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from config import settings
 
 import database
 import tasks
@@ -12,7 +13,13 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(tasks.my_cron_logic, "interval", seconds=2)
+
+    scheduler.add_job(
+        tasks.my_cron_logic,
+        "interval",
+        seconds=settings.CRON_INTERVAL_SECONDS
+    )
+
     scheduler.start()
     logger.info("Scheduler started...")
     yield
