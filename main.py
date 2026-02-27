@@ -25,10 +25,11 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 @app.get("/update-database")
-def update_database():
+async def update_database():
     # make the request to the external API and update the database
-    tasks.request_new_data()
-    tasks.insert_new_data()
+    data = await tasks.request_new_data()
+
+    tasks.insert_new_data(data)
     logger.info("Database updated successfully")
 
     return {"status": "success", "message": "Database updated successfully"}
