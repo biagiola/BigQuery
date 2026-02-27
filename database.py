@@ -3,6 +3,16 @@ from google.cloud import bigquery
 from dotenv import load_dotenv
 from fastapi import HTTPException
 from config import settings
+from google.api_core import retry
+
+# Configure a custom retry strategy for BigQuery
+# This will automatically retry on 500, 503 errors or network timeouts
+custom_retry = retry.Retry(
+    initial=1.0,  # First retry after 1 second
+    maximum=10.0, # Cap retry delay at 10 seconds
+    multiplier=2.0,
+    deadline=60.0 # Total time to keep trying
+)
 
 # client = bigquery.Client()
 client = bigquery.Client(project=settings.PROJECT_ID)
@@ -10,10 +20,17 @@ client = bigquery.Client(project=settings.PROJECT_ID)
 def get_accidentes():
     query = f"SELECT sexo FROM `{settings.TABLE_FULL_PATH}`"
     try:
-        query_job = client.query(query)
-        return [dict(row) for row in query_job.result()]
+        # Use 'timeout' to prevent the request from hanging forever
+        # Use 'retry' to handle transient network blips
+        query_job = client.query(query, timeout=30, retry=custom_retry)
+        
+        # result() is where the permission check actually happens
+        rows = query_job.result() 
+        return [dict(row) for row in rows]
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.error(f"BigQuery Query Failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"BigQuery Error: {str(e)}")
 
 def insert_test_accidentes():
     query = """

@@ -7,8 +7,6 @@ class Config:
     PROJECT_ID = os.getenv("PROJECT_ID")
     DATASET_ID = os.getenv("DATASET_ID")
     TABLE_NAME = os.getenv("TABLE_NAME")
-    
-    CRON_INTERVAL_SECONDS = int(os.getenv("CRON_INTERVAL_SECONDS", 2))
 
     @property
     def TABLE_FULL_PATH(self):

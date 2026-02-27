@@ -30,4 +30,4 @@ def insert_accidentes():
 
 @app.get("/")
 def read_root():
-    return {"message": "Hello, World!"}
+    return {"message": "Server is running!"}
