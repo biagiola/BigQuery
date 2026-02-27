@@ -1,9 +1,9 @@
 import os
-from google.cloud import bigquery
-from dotenv import load_dotenv
-from fastapi import HTTPException
 from config import settings
+from google.cloud import bigquery
 from google.api_core import retry
+from fastapi import HTTPException
+from dotenv import load_dotenv
 
 # Configure a custom retry strategy for BigQuery
 # This will automatically retry on 500, 503 errors or network timeouts
